@@ -26,19 +26,33 @@ module.exports.register = async (req, res, next) => {
 };
 
 module.exports.login = async (req, res, next) => {
-    try {
-      const { username, password } = req.body;
-      const user = await User.findOne({ username });
-      if (!user) {
-        return res.json({ msg: "Username Not Found", status: false });
-      }
-      const isPasswordValid = await bcrypt.compare(password,user.password);
-      if (!isPasswordValid) {
-        return res.json({ msg: "Incorrect Password", status: false });
-      }
-      delete user.password;
-      return res.json({ status: true, user });
-    } catch (err) {
-      next(err);
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.json({ msg: "Username Not Found", status: false });
     }
-  };
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.json({ msg: "Incorrect Password", status: false });
+    }
+    delete user.password;
+    return res.json({ status: true, user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.setAvatar = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const avatarImage = req.body.image;
+        const userData = await User.findByIdAndUpdate(userId,{
+            isAvatarSet: true,
+            avatarImage: avatarImage,
+        });
+        return res.json({isSet: userData.isAvatarSet,image: userData.avatarImage});
+    } catch (error) {
+        next(error);
+    }
+};
