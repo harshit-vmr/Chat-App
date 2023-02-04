@@ -1,54 +1,63 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
-import { Buffer } from "buffer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import { allUsersRoute, setAvatarRoute } from "../utils/API";
+import { allUsersRoute } from "../utils/API";
 import Contacts from "../components/Contacts";
-
-
+import Welcome from "../components/Welcome";
 
 export default function Chat() {
-
   const navigate = useNavigate();
 
   const [contacts, setContacts] = useState([]);
 
   const [currentUser, setCurrentUser] = useState(undefined);
 
+  const [currentChat, setCurrentChat] = useState(undefined);
+
   useEffect(() => {
     async function func() {
       if (!localStorage.getItem("chat-app-user")) {
         navigate("/login");
-      }
-      else{
+      } else {
         setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
       }
     }
     func();
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     async function func() {
-      if(currentUser){
-        if(currentUser.isAvatarImageSet){
+      if (currentUser) {
+        if (currentUser.isAvatarSet) {
+
           const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
           setContacts(data.data);
-        }
-        else{
+        } else {
           navigate("/setAvatar");
         }
       }
     }
     func();
-  },[]);
+  }, [currentUser]);
+
+  const handleChange = (chat) => {
+    setCurrentChat(chat);
+  };
 
   return (
     <Container>
       <div className="container">
-        <Contacts contacts = {contacts} currentUser = {currentUser} />
+        <Contacts
+          contacts={contacts}
+          currentUser={currentUser}
+          changeChat={handleChange}
+        />
+        <Welcome 
+          currentUser={currentUser}
+        />
       </div>
     </Container>
   );
